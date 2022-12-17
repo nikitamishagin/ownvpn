@@ -9,77 +9,70 @@ terraform {
 }
 
 provider "yandex" {
-  zone                     = "ru-central1-a"
+  zone = var.zone
 }
 
+resource "yandex_vpc_address" "addr" {
+    labels     = var.labels
+    
+    external_ipv4_address {
+        zone_id = var.zone
+    }
+}
+
+// Configure the instance
 resource "yandex_compute_instance" "ownvpn" {
-    folder_id                 = "b1g03tpdbjpq22ekdtls"
-    hostname                  = "ownvpn"
-    labels                    = {}
-    metadata                  = {
-        "install-unified-agent" = "0"
-        "serial-port-enable"    = "1"
-        "ssh-keys"              = "mishagin:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC499ZksssxclICZQJS2tn+zWN+g8fe3U69R1RL26uMczTe5MK2JpvFhqXc9hld2uThHUXUI6VzHmUquwqZrUp1CYbTxf/4zqu8DJtabQt3Xot2UmdXdzi8MFYsiRf6ENlBMy6vpWkC0fHlkrku/nnElrcy1lD8gdShQFKGT6bDImfTi8v+uG7ElDlPDKgLYbe0Wa93L43NBfjKdRzYi/1mkhSusMfS3R2T3UKeThHlqFYpGmvH1gf77Uzk8oHHflCojqoyAK10CG0uf4deE2Jf27pNOiu3G9cvuIiSuqtZn1QGIYGhjSyfNcseBygCMuvDH/cOf3Ol2/NIZqmSSjIiyoLTRVh+qqPq1psHctg+VdaRkIuuC/s6/UVvfR5vjY96NYONffyP9rXKRzc6JbYEjBzwYZweZAVbyhXcXLMvvCtNth4WS1SJXEvC0G19iN6TKBmnY9ZjqbrP08S8ZHdZtQW9KCFZqhHHtTrVPvCLFzNgT3XOSMl64OKpkAi7KiUg8daFQ3JNey82N37ggnXtsvnCE7Z7NctLz/+05XTIwm/5iqCoF9uE47BJLtY3/yyB9epkTx8Dc7/QbfQqOO/6swW45IPRWQIdf/2eKksUWjPalTmxDyXDLATKU45VK/GOavw8cWBdSGTn7y6P3tNYGrQhesEiJ2CxzZpiHr8fkw== mishagin@asuslaptop"
-        "user-data"             = <<-EOT
+  folder_id = var.folder_id
+  hostname  = var.hostname
+  labels    = var.labels
+  metadata = {
+    "install-unified-agent" = "0"
+    "serial-port-enable"    = "1"
+    "ssh-keys"              = "var.username:var.ssh_key"
+    "user-data"             = <<-EOT
             #cloud-config
             datasource:
              Ec2:
               strict_id: false
             ssh_pwauth: no
             users:
-            - name: mishagin
+            - name: ${var.username}
               sudo: ALL=(ALL) NOPASSWD:ALL
               shell: /bin/bash
               ssh_authorized_keys:
-              - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC499ZksssxclICZQJS2tn+zWN+g8fe3U69R1RL26uMczTe5MK2JpvFhqXc9hld2uThHUXUI6VzHmUquwqZrUp1CYbTxf/4zqu8DJtabQt3Xot2UmdXdzi8MFYsiRf6ENlBMy6vpWkC0fHlkrku/nnElrcy1lD8gdShQFKGT6bDImfTi8v+uG7ElDlPDKgLYbe0Wa93L43NBfjKdRzYi/1mkhSusMfS3R2T3UKeThHlqFYpGmvH1gf77Uzk8oHHflCojqoyAK10CG0uf4deE2Jf27pNOiu3G9cvuIiSuqtZn1QGIYGhjSyfNcseBygCMuvDH/cOf3Ol2/NIZqmSSjIiyoLTRVh+qqPq1psHctg+VdaRkIuuC/s6/UVvfR5vjY96NYONffyP9rXKRzc6JbYEjBzwYZweZAVbyhXcXLMvvCtNth4WS1SJXEvC0G19iN6TKBmnY9ZjqbrP08S8ZHdZtQW9KCFZqhHHtTrVPvCLFzNgT3XOSMl64OKpkAi7KiUg8daFQ3JNey82N37ggnXtsvnCE7Z7NctLz/+05XTIwm/5iqCoF9uE47BJLtY3/yyB9epkTx8Dc7/QbfQqOO/6swW45IPRWQIdf/2eKksUWjPalTmxDyXDLATKU45VK/GOavw8cWBdSGTn7y6P3tNYGrQhesEiJ2CxzZpiHr8fkw== mishagin@asuslaptop
+              - ${var.ssh_key}
         EOT
-    }
-    name                      = "ownvpn"
-    network_acceleration_type = "standard"
-    platform_id               = "standard-v3"
-    service_account_id        = "ajedkig2bbo615k6fomu"
-    zone                      = "ru-central1-a"
+  }
+  name               = var.name
+  platform_id        = var.platform_id
+  service_account_id = var.service_account_id
+  zone               = var.zone
 
-    boot_disk {
-        auto_delete = true
-        mode        = "READ_WRITE"
-
-        initialize_params {
-            block_size = 4096
-            size       = 5
-            type       = "network-ssd"
-        }
+  boot_disk {
+    auto_delete = var.auto_delete
+    mode        = var.disk_mode
+    device_name = var.device_name
+    initialize_params {
+      block_size = var.block_size
+      size       = var.size
+      type       = var.type
     }
+  }
 
-    metadata_options {
-        aws_v1_http_endpoint = 1
-        aws_v1_http_token    = 1
-        gce_http_endpoint    = 1
-        gce_http_token       = 1
-    }
+  network_interface {
+    nat                = var.nat
+    security_group_ids = var.security_group_ids
+    subnet_id          = var.subnet_id
+  }
 
-    network_interface {
-        ip_address         = "10.128.0.26"
-        ipv4               = true
-        ipv6               = false
-        nat                = true
-        nat_ip_address     = "51.250.5.16"
-        security_group_ids = []
-        subnet_id          = "e9bgr0e54f3q7ulv429d"
-    }
+  resources {
+    core_fraction = var.core_fraction
+    cores         = var.cores
+    gpus          = var.gpus
+    memory        = var.memory
+  }
 
-    placement_policy {
-        host_affinity_rules = []
-    }
-
-    resources {
-        core_fraction = 20
-        cores         = 2
-        gpus          = 0
-        memory        = 1
-    }
-
-    scheduling_policy {
-        preemptible = true
-    }
+  scheduling_policy {
+    preemptible = var.preemptible
+  }
 }
