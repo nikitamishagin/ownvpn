@@ -13,11 +13,11 @@ provider "yandex" {
 }
 
 resource "yandex_vpc_address" "addr" {
-    labels     = var.labels
-    
-    external_ipv4_address {
-        zone_id = var.zone
-    }
+  labels = var.labels
+
+  external_ipv4_address {
+    zone_id = var.zone
+  }
 }
 
 // Configure the instance
@@ -61,6 +61,7 @@ resource "yandex_compute_instance" "ownvpn" {
 
   network_interface {
     nat                = var.nat
+    nat_ip_address     = yandex_vpc_address.addr.external_ipv4_address[0].address
     security_group_ids = var.security_group_ids
     subnet_id          = var.subnet_id
   }
