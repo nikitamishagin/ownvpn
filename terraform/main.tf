@@ -13,7 +13,7 @@ provider "yandex" {
 }
 
 // Configure the service account
-resource "yandex_iam_service_account" "vpnuser" {
+resource "yandex_iam_service_account" "monitor" {
   folder_id = var.folder_id
   name      = var.sa_name
 }
@@ -89,7 +89,7 @@ resource "yandex_compute_instance" "ownvpn" {
   }
   name               = var.name
   platform_id        = var.platform_id
-  service_account_id = var.service_account_id
+  service_account_id = yandex_iam_service_account.monitor.id
   zone               = var.zone
 
   boot_disk {

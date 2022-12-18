@@ -1,10 +1,9 @@
 // The location where the instance was created
 zone               = "ru-central1-a"
 folder_id          = "b1g03tpdbjpq22ekdtls"
-service_account_id = "ajedkig2bbo615k6fomu"
 
 // Service account option
-sa_name            = "vpnuser"
+sa_name            = "monitor"
 
 // Security group option
 default_network_id = "enpn0so7nhg38firn6fb"

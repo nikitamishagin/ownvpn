@@ -8,17 +8,12 @@ variable "folder_id" {
   description = "The ID of the folder that the resource belongs to. If it is not provided, the default provider folder is used."
   type        = string
 }
-variable "service_account_id" {
-  description = "ID of the service account authorized for this instance."
-  type        = string
-  default     = ""
-}
 
 // Service account option
 variable "sa_name" {
   description = "Name of the service account. Can be updated without creating a new resource."
   type        = string
-  default     = "vpnuser"
+  default     = "monitor"
 }
 
 // Security group option
