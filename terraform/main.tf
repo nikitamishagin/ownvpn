@@ -12,11 +12,49 @@ provider "yandex" {
   zone = var.zone
 }
 
+// Configure the public ip address
 resource "yandex_vpc_address" "addr" {
   labels = var.labels
 
   external_ipv4_address {
     zone_id = var.zone
+  }
+}
+
+// Configure the security group
+resource "yandex_vpc_security_group" "group_vpn" {
+  description = "Access to OpenVPN server."
+  labels      = var.labels
+  name        = var.sg_name
+  network_id  = var.network_id
+
+  egress {
+    from_port      = 0
+    labels         = var.labels
+    port           = -1
+    protocol       = "ANY"
+    to_port        = 65535
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description    = "openvpn"
+    from_port      = -1
+    labels         = var.labels
+    port           = 1194
+    protocol       = "UDP"
+    to_port        = -1
+    v4_cidr_blocks = var.vpn_cidr_blocks
+  }
+
+  ingress {
+    description    = "ssh"
+    from_port      = -1
+    labels         = var.labels
+    port           = 22
+    protocol       = "TCP"
+    to_port        = -1
+    v4_cidr_blocks = var.ssh_cidr_blocks
   }
 }
 
@@ -62,7 +100,6 @@ resource "yandex_compute_instance" "ownvpn" {
   network_interface {
     nat                = var.nat
     nat_ip_address     = yandex_vpc_address.addr.external_ipv4_address[0].address
-    security_group_ids = var.security_group_ids
     subnet_id          = var.subnet_id
   }
 

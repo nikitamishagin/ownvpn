@@ -14,6 +14,27 @@ variable "service_account_id" {
   default     = ""
 }
 
+// Security group option
+variable "network_id" {
+  description = "ID of the network this security group belongs to."
+  type        = string
+}
+variable "sg_name" {
+  description = "Name of the security group."
+  type        = string
+  default     = "group_vpn"
+}
+variable "vpn_cidr_blocks" {
+  description = "The blocks of IPv4 addresses for the OpenVPN connection rule."
+  type        = list
+  default     = ["0.0.0.0/0"]
+}
+variable "ssh_cidr_blocks" {
+  description = "The blocks of IPv4 addresses for the SSH connection rule."
+  type        = list
+  default     = ["0.0.0.0/0"]
+}
+
 // Access to instance
 variable "username" {
   description = "The username to access the instance."
@@ -114,11 +135,6 @@ variable "nat" {
   description = "Provide a public address, for instance, to access the internet over NAT."
   type        = bool
   default     = true
-}
-variable "security_group_ids" {
-  description = "Security group ids for network interface."
-  type        = list(any)
-  default     = []
 }
 variable "subnet_id" {
   description = "ID of the subnet to attach this interface to. The subnet must exist in the same zone where this instance will be created."
