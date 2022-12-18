@@ -12,6 +12,12 @@ provider "yandex" {
   zone = var.zone
 }
 
+// Configure the service account
+resource "yandex_iam_service_account" "vpnuser" {
+  folder_id = var.folder_id
+  name      = var.sa_name
+}
+
 // Configure the public ip address
 resource "yandex_vpc_address" "addr" {
   labels = var.labels
@@ -26,7 +32,7 @@ resource "yandex_vpc_security_group" "group_vpn" {
   description = "Access to OpenVPN server."
   labels      = var.labels
   name        = var.sg_name
-  network_id  = var.network_id
+  network_id  = var.default_network_id
 
   egress {
     from_port      = 0
@@ -98,9 +104,9 @@ resource "yandex_compute_instance" "ownvpn" {
   }
 
   network_interface {
-    nat                = var.nat
-    nat_ip_address     = yandex_vpc_address.addr.external_ipv4_address[0].address
-    subnet_id          = var.subnet_id
+    nat            = var.nat
+    nat_ip_address = yandex_vpc_address.addr.external_ipv4_address[0].address
+    subnet_id      = var.subnet_id
   }
 
   resources {

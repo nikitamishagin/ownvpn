@@ -14,8 +14,15 @@ variable "service_account_id" {
   default     = ""
 }
 
+// Service account option
+variable "sa_name" {
+  description = "Name of the service account. Can be updated without creating a new resource."
+  type        = string
+  default     = "vpnuser"
+}
+
 // Security group option
-variable "network_id" {
+variable "default_network_id" {
   description = "ID of the network this security group belongs to."
   type        = string
 }
