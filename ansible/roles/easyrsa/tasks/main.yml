@@ -1,6 +1,6 @@
 ---
 - name: Install easy-rsa package
-  become: yes
+  become: true
   apt:
     name: easy-rsa
     state: latest

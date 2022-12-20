@@ -1,25 +1,35 @@
 ---
-- name: Remove trash snap lxd
-  snap:
-    name: lxd
-    state: absent
+- name: Getting list of installed packages
+  package_facts:
+    manager: "auto"
 
-- name: Remove trash snap core20
-  snap:
-    name: core20
-    state: absent
+- name: Removing trash such as snaps
+  block:
+  - name: Remove snap lxd
+    snap:
+      name: lxd
+      state: absent
 
-- name: Remove trash snap snapd
-  snap:
-    name: snapd
-    state: absent
+  - name: Remove snap core20
+    snap:
+      name: core20
+      state: absent
+
+  - name: Remove snap snapd
+    snap:
+      name: snapd
+      state: absent
+  become: true
+  when: "'snapd' in ansible_facts.packages"
 
 - name: Remove snapd package
+  become: true
   apt:
     name: snapd
     state: absent
     autoremove: true
 
 - name: Upgrade packages
+  become: true
   apt:
     upgrade: dist
