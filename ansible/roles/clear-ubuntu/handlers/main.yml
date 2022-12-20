@@ -1,0 +1,5 @@
+---
+- name: Reload UFW service
+  become: true
+  ufw:
+    state: reloaded

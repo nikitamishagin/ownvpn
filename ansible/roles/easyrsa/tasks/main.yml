@@ -4,13 +4,12 @@
   apt:
     name: easy-rsa
     state: latest
-    update_cache: yes
 
 - name: Create a directory
   file:
     path: ~/easy-rsa
     state: directory
-    mode: '0700'
+    mode: 0700
 
 - name: Create a symbolic link
   file:

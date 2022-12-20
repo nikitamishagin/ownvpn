@@ -15,41 +15,45 @@
   become: true
   copy:
     src: "{{ ansible_facts.env.HOME }}/easy-rsa/pki/issued/server.crt"
-    dest: /etc/opencpn/server/
+    dest: /etc/openvpn/server/server.crt
     remote_src: true
     owner: root
     group: root
     mode: 0644
+  notify: Restart openvpn service
 
 - name: Copy server.key
   become: true
   copy:
     src: "{{ ansible_facts.env.HOME }}/easy-rsa/pki/private/server.key"
-    dest: /etc/opencpn/server/
+    dest: /etc/openvpn/server/server.key
     remote_src: true
     owner: root
     group: root
     mode: 0644
+  notify: Restart openvpn service
 
 - name: Copy ca.crt
   become: true
   copy:
     src: "{{ ansible_facts.env.HOME }}/easy-rsa/pki/ca.crt"
-    dest: /etc/opencpn/server/
+    dest: /etc/openvpn/server/ca.crt
     remote_src: true
     owner: root
     group: root
     mode: 0644
+  notify: Restart openvpn service
 
 - name: Copy ta.key
   become: true
   copy:
     src: "{{ ansible_facts.env.HOME }}/easy-rsa/ta.key"
-    dest: /etc/opencpn/server/
+    dest: /etc/openvpn/server/ta.key
     remote_src: true
     owner: root
     group: root
     mode: 0644
+  notify: Restart openvpn service
 
 - name: Copy openvpn config file
   become: true
@@ -59,3 +63,25 @@
     owner: root
     group: root
     mode: 0644
+  notify: Restart openvpn service
+
+- name: Start openvpn service
+  become: true
+  systemd:
+    name: openvpn-server@server
+    state: started
+
+- name: Create client config directory
+  file:
+    path: ~/client-configs/{{ item }}
+    state: directory
+    mode: 0700
+  loop:
+  - "keys"
+  - "files"
+
+- name: Copy script for make client-configs
+  copy:
+    src: make_client_config.sh
+    dest: ~/easy-rsa/make_client_config.sh
+    mode: 0774

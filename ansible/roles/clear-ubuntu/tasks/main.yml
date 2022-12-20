@@ -33,3 +33,53 @@
   become: true
   apt:
     upgrade: dist
+
+- name: Server networking configuration
+  become: true
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    state: present
+    reload: true
+  notify: Reload UFW service
+
+- name: Copy before.rules
+  become: true
+  template:
+    src: before.rules.j2
+    dest: /etc/ufw/before.rules
+    owner: root
+    group: root
+    mode: 0640
+  notify: Reload UFW service
+
+- name: Copy ufw file
+  become: true
+  copy:
+    src: ufw
+    dest: /etc/default/ufw
+    owner: root
+    group: root
+    mode: 0644
+  notify: Reload UFW service
+
+- name: Allow 22 port TCP
+  become: true
+  ufw:
+    rule: allow
+    port: 22
+    proto: tcp
+    src: 0.0.0.0/0
+
+- name: Allow 1194 port UDP
+  become: true
+  ufw:
+    rule: allow
+    port: 1194
+    proto: udp
+    src: 0.0.0.0/0
+
+- name: Enable UFW
+  become: true
+  ufw:
+    state: enabled
