@@ -1,0 +1,7 @@
+---
+- name: Configure the ownvpn instance
+  hosts: ownvpn
+  gather_facts: false
+  roles:
+  - clear-ubuntu
+  - easyrsa

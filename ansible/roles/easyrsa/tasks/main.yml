@@ -1,0 +1,52 @@
+---
+- name: Install easy-rsa package
+  become: yes
+  apt:
+    name: easy-rsa
+    state: latest
+    update_cache: yes
+
+- name: Create a directory
+  file:
+    path: ~/easy-rsa
+    state: directory
+    mode: '0700'
+
+- name: Create a symbolic link
+  file:
+    src: "/usr/share/easy-rsa/{{ item }}"
+    dest: "~/easy-rsa/{{ item }}"
+    state: link
+  loop:
+  - "easyrsa"
+  - "openssl-easyrsa.cnf"
+  - "x509-types"
+
+- name: Initialize pki
+  command: ./easyrsa init-pki
+  args:
+    chdir: ~/easy-rsa
+    creates: ~/easy-rsa/pki
+
+- name: Configure vars for easy-rsa
+  template:
+    src: vars
+    dest: ~/easy-rsa/vars
+
+- name: Build CA without password
+  command: ./easyrsa --batch build-ca nopass
+  args:
+    chdir: ~/easy-rsa
+    creates: ~/easy-rsa/pki/private/ca.key
+
+- name: Generate the server pair
+  command: ./easyrsa --batch gen-req server nopass
+  args:
+    chdir: ~/easy-rsa
+    creates: ~/easy-rsa/pki/private/server.key
+
+- name: Sign the server request
+  command: ./easyrsa --batch sign-req server server
+  args:
+    chdir: ~/easy-rsa
+    creates: ~/easy-rsa/pki/issued/server.crt

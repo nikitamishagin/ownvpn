@@ -1,0 +1,25 @@
+---
+- name: Remove trash snap lxd
+  snap:
+    name: lxd
+    state: absent
+
+- name: Remove trash snap core20
+  snap:
+    name: core20
+    state: absent
+
+- name: Remove trash snap snapd
+  snap:
+    name: snapd
+    state: absent
+
+- name: Remove snapd package
+  apt:
+    name: snapd
+    state: absent
+    autoremove: true
+
+- name: Upgrade packages
+  apt:
+    upgrade: dist
