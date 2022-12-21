@@ -1,2 +1,2 @@
 [default]
-ownvpn  ansible_host=
+ownvpn  ansible_host=xxxxxxxxxx
