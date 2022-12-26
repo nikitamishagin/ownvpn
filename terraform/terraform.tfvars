@@ -34,7 +34,7 @@ core_fraction      = 20
 cores              = 2
 gpus               = 0
 memory             = 1
-preemptible        = true
+preemptible        = false
 
 // Instance network interface
 nat                = true

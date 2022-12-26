@@ -66,9 +66,10 @@ resource "yandex_vpc_security_group" "group_vpn" {
 
 // Configure the instance
 resource "yandex_compute_instance" "ownvpn" {
-  folder_id = var.folder_id
-  hostname  = var.hostname
-  labels    = var.labels
+  folder_id                 = var.folder_id
+  hostname                  = var.hostname
+  labels                    = var.labels
+  allow_stopping_for_update = true
   metadata = {
     "install-unified-agent" = "0"
     "serial-port-enable"    = "1"
