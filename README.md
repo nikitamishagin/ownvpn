@@ -17,6 +17,8 @@ https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 
 https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
 
+And you will also need to get access to the "security groups" service from Yandex technical support. For reasons I don't understand, this important feature is not provided by default.
+
 # How to use
 
 To deploy your own VPN server in Yandex Cloud, you must complete the following steps:
@@ -49,7 +51,7 @@ To deploy your own VPN server in Yandex Cloud, you must complete the following s
     export YC_TOKEN="xxxxxxx"
     export YC_FOLDER_ID="xxxxxxx"
     ```
-    You can get a temporary token with the command:
+    You can view your cloud_id and folder_id in the Yandex web-console. And you can get a temporary token with the command:
     ```bash
     yc iam create-token
     ```

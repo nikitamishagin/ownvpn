@@ -28,6 +28,7 @@ device_name        = ""
 block_size         = 4096
 size               = 5
 type               = "network-ssd"
+image_id           = "fd89n8278rhueakslujo"
 
 // Instance resources
 core_fraction      = 20

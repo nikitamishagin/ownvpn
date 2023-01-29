@@ -28,12 +28,12 @@ variable "sg_name" {
 }
 variable "vpn_cidr_blocks" {
   description = "The blocks of IPv4 addresses for the OpenVPN connection rule."
-  type        = list
+  type        = list(any)
   default     = ["0.0.0.0/0"]
 }
 variable "ssh_cidr_blocks" {
   description = "The blocks of IPv4 addresses for the SSH connection rule."
-  type        = list
+  type        = list(any)
   default     = ["0.0.0.0/0"]
 }
 
@@ -102,7 +102,11 @@ variable "type" {
   type        = string
   default     = "network-ssd"
 }
-
+variable "image_id" {
+  description = "Type boot image."
+  type        = string
+  default     = "fd89n8278rhueakslujo"
+}
 
 // Instance resources
 variable "core_fraction" {

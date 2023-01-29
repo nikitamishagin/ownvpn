@@ -101,6 +101,7 @@ resource "yandex_compute_instance" "ownvpn" {
       block_size = var.block_size
       size       = var.size
       type       = var.type
+      image_id   = var.image_id
     }
   }
 
