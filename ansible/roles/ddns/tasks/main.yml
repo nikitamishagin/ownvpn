@@ -1,0 +1,17 @@
+---
+- name: Copy ddns-cloudflare.sh
+  become: true
+  template:
+    src: ddns-cloudflare.sh.j2
+    dest: /root/ddns-cloudflare.sh
+    owner: root
+    group: root
+    mode: 0700
+
+- name: Create a cron job
+  become: true
+  cron:
+    name: Run DDNS script for CloudFlare
+    special_time: reboot
+    user: root
+    job: /root/ddns-cloudflare.sh

@@ -1,0 +1,10 @@
+#/bin/bash
+DNS_ZONE='{{ lookup('env','CF_DNS_ZONE') }}'
+DNS_RECORD='{{ lookup('env','CF_DNS_RECORD') }}'
+DNS_RECORD_NAME='"{{ lookup('env','CF_DNS_RECORD_NAME') }}"'
+AUTH_KEY='{{ lookup('env','CF_AUTH_KEY') }}'
+CURRENT_IP_ADDRESS="\"$(curl -s ip.me)\""
+CURRENT_DNS_VALUE=$(curl -sX GET "https://api.cloudflare.com/client/v4/zones/${DNS_ZONE}/dns_records/${DNS_RECORD}" -H "Content-Type:application/json" -H "Authorization: Bearer ${AUTH_KEY}" | jq '.result["content"]')
+if [ ${CURRENT_DNS_VALUE} != ${CURRENT_IP_ADDRESS} ]; then
+    curl -sX PUT "https://api.cloudflare.com/client/v4/zones/${DNS_ZONE}/dns_records/${DNS_RECORD}" -H "Content-Type:application/json" -H "Authorization: Bearer ${AUTH_KEY}" --data '{"type":"A","name":'${DNS_RECORD_NAME}',"content":'${CURRENT_IP_ADDRESS}',"ttl":1,"proxied":false}' > /dev/null
+fi

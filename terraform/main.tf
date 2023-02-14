@@ -18,15 +18,6 @@ resource "yandex_iam_service_account" "monitor" {
   name      = var.sa_name
 }
 
-// Configure the public ip address
-resource "yandex_vpc_address" "addr" {
-  labels = var.labels
-
-  external_ipv4_address {
-    zone_id = var.zone
-  }
-}
-
 // Configure the security group
 resource "yandex_vpc_security_group" "group_vpn" {
   description = "Access to OpenVPN server."
@@ -107,7 +98,6 @@ resource "yandex_compute_instance" "ownvpn" {
 
   network_interface {
     nat            = var.nat
-    nat_ip_address = yandex_vpc_address.addr.external_ipv4_address[0].address
     subnet_id      = var.subnet_id
   }
 

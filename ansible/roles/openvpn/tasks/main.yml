@@ -65,9 +65,12 @@
 
 - name: Copy script for make client-configs
   copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-    mode: "{{ item.mode }}"
-  loop:
-  - { src: "make_client_config.sh", dest: "{{ ansible_facts.env.HOME }}/easy-rsa/make_client_config.sh", mode: "0774" }
-  - { src: "base.conf", dest: "{{ ansible_facts.env.HOME }}/client-configs/base.conf", mode: "0664" }
+    src: make_client_config.sh
+    dest: "{{ ansible_facts.env.HOME }}/easy-rsa/make_client_config.sh"
+    mode: 0774
+
+- name: Copy base config for clients
+  template:
+    src: base.conf.j2
+    dest: "{{ ansible_facts.env.HOME }}/client-configs/base.conf"
+    mode: 0644

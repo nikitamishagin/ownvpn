@@ -8,14 +8,20 @@ https://www.digitalocean.com/community/tutorials/how-to-set-up-and-configure-a-c
 
 https://www.digitalocean.com/community/tutorials/how-to-set-up-and-configure-an-openvpn-server-on-ubuntu-22-04
 
+To create a DDNS script, I used the materials from the article below:
+
+https://vectops.com/2022/02/3-ways-to-set-up-dyndns-with-cloudflare/
+
 
 # Requirements
 
-For this to work, you will need to install Terraform and Ansible. Links to official instructions are attached below:
+For this to work, you will need to install Terraform, Ansible and create an account in CloudFlare. Links to official instructions are attached below:
 
 https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 
 https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
+
+https://developers.cloudflare.com/fundamentals/account-and-billing/account-setup/create-account/
 
 And you will also need to get access to the "security groups" service from Yandex technical support. For reasons I don't understand, this important feature is not provided by default.
 
@@ -23,60 +29,81 @@ And you will also need to get access to the "security groups" service from Yande
 
 To deploy your own VPN server in Yandex Cloud, you must complete the following steps:
 
+## Preparation
+
+1. (Optional) For convenient Yandex cloud management, I recommend installing the Yandex Cloud CLI package. The YC CLI commands will be shown below to get the necessary information from your terminal.
+
+   Link to instructions: https://cloud.yandex.com/en/docs/cli/operations/install-cli
+
+2. Get the cloud id, folder id and the name of the availability zone in which the infrastructure will be deployed. This can be done in the Yandex cloud web console.
+
+3. Get the default network id. If you are using the YC CLI, then this can be done with the command:
+   ```bash
+   yc vpc network list
+   ```
+
+4. Get the default subnet id for the selected availability zone. If you are using the YC CLI, then this can be done with the command:
+   ```bash
+   yc vpc subnet list
+   ```
+
+5. You can get a temporary token with the command:
+   ```bash
+   yc iam create-token
+   ```
+
+6. You can get your account_id and zone_id CloudFlare using the following instructions: https://developers.cloudflare.com/fundamentals/get-started/basic-tasks/find-account-and-zone-ids/
+
+7. CloudFlare token can be obtained using the following instruction: https://developers.cloudflare.com/fundamentals/api/get-started/create-token/
+
+8. Getting the record_id is not an easy task. To do this, you need to refer to the official CloudFlare documentation: https://api.cloudflare.com/#dns-records-for-a-zone-list-dns-records
+
+   But the authorization method specified there does not work. After searching the forums for answers, I found the method below:
+   ```bash
+   curl -sX GET "https://api.cloudflare.com/client/v4/zones/<your_cf_zone_id>/dns_records/" \
+     -H "Authorization: Bearer <your_cf_token>" \
+     -H "Content-Type: application/json" | jq
+   ```
+   The field you need is called "id".
+
+9. For terraform to work with your YandexCloud, and for the DDNS script to update records in your CloudFlare, you need to create a file with credentials in the following format:
+   ```bash
+   export YC_CLOUD_ID="<your_yc_account_id>"
+   export YC_TOKEN="<your_yc_token>"
+   export YC_FOLDER_ID="<your_yc_folder_id>"
+   export CF_DNS_ZONE="<your_cf_zone_id>"
+   export CF_DNS_RECORD="<your_cf_record_id>"
+   export CF_DNS_RECORD_NAME="<your_cf_record_name>"
+   export CF_AUTH_KEY="<your_cf_token>"
+   ```
+   You can apply the credentials with the command:
+   ```bash
+   source /path-to-credentials-file
+   ```
+
 ## Deploy infrastructure with Terraform
 
-1.  (Optional) For convenient Yandex cloud management, I recommend installing the Yandex Cloud CLI package. The YC CLI commands will be shown below to get the necessary information from your terminal.
+1. Install terraform to automatically deploy resources in the cloud.
    
-    Link to instructions: https://cloud.yandex.com/en/docs/cli/operations/install-cli
+   Link to instructions: https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 
-2.  Get the cloud id, folder id and the name of the availability zone in which the infrastructure will be deployed. This can be done in the Yandex cloud web console.
+2. Go to terraform directory:
+   ```bash
+   cd ./terraform
+   ```
    
-3.  Get the default network id. If you are using the YC CLI, then this can be done with the command:
-    ```bash
-    yc vpc network list
-    ```
-
-4.  Get the default subnet id for the selected availability zone. If you are using the YC CLI, then this can be done with the command:
-    ```bash
-    yc vpc subnet list
-    ```
-
-5.  Install terraform to automatically deploy resources in the cloud.
-    
-    Link to instructions: https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
-
-6.  For terraform to work with your cloud, you need to create a file with credentials in the format:
-    ```bash
-    export YC_CLOUD_ID="xxxxxxx"
-    export YC_TOKEN="xxxxxxx"
-    export YC_FOLDER_ID="xxxxxxx"
-    ```
-    You can view your cloud_id and folder_id in the Yandex web-console. And you can get a temporary token with the command:
-    ```bash
-    yc iam create-token
-    ```
-    You can apply the credentials with the command:
-    ```bash
-    source /path-to-credentials-file
-    ```
-
-7.  Go to terraform directory:
-    ```bash
-    cd ./terraform
-    ```
+3. Check the `./terraform/terraform.tfvars` file, and change the values of the variables if you need it.
    
-8.  Check the `./terraform/terraform.tfvars` file, and change the values of the variables if you need it.
-   
-9.  Run command:
-    ```bash
-    terraform plan
-    ```
-    and check that all required resources will be correctly created.
+4. Run command:
+   ```bash
+   terraform plan
+   ```
+   and check that all required resources will be correctly created.
 
-10. If everything is correct, run command:
-    ```bash
-    terraform apply
-    ```
+5. If everything is correct, run command:
+   ```bash
+   terraform apply
+   ```
 
 After that, the required infrastructure is deployed. In Terraform output will show the ip address of your machine. You will need it to configure and connect via ssh.
 
@@ -85,10 +112,6 @@ After that, the required infrastructure is deployed. In Terraform output will sh
 1. Copy the ip address received from Terraform and add it to the ansible inventory file. It is convenient to do this using a regular expression:
    ```bash
    sed -i "s/xxxxxxxxxx/<your-ip-address>/g" ./ansible/hosts.txt
-   ```
-   You will also need to change the ip address in the client config template:
-   ```bash
-   sed -i "s/xxxxxxxxxx/<your-ip-address>/g" ./ansible/roles/openvpn/files/base.conf
    ```
 
 2. Go to ansible directory:
