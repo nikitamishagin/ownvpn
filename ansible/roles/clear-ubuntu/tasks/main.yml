@@ -4,22 +4,14 @@
     manager: "auto"
 
 - name: Removing trash such as snaps
-  block:
-  - name: Remove snap lxd
-    snap:
-      name: lxd
-      state: absent
-
-  - name: Remove snap core20
-    snap:
-      name: core20
-      state: absent
-
-  - name: Remove snap snapd
-    snap:
-      name: snapd
-      state: absent
   become: true
+  snap:
+    name: "{{ item }}"
+    state: absent
+  loop:
+  - lxd
+  - core20
+  - snapd
   when: "'snapd' in ansible_facts.packages"
 
 - name: Remove snapd package
@@ -63,21 +55,16 @@
     mode: 0644
   notify: Reload UFW service
 
-- name: Allow 22 port TCP
+- name: Add firewall rules
   become: true
   ufw:
     rule: allow
-    port: 22
-    proto: tcp
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
     src: 0.0.0.0/0
-
-- name: Allow 1194 port UDP
-  become: true
-  ufw:
-    rule: allow
-    port: 1194
-    proto: udp
-    src: 0.0.0.0/0
+  loop:
+  - { port: 22, proto: tcp }
+  - { port: 1194, proto: udp }
 
 - name: Enable UFW
   become: true

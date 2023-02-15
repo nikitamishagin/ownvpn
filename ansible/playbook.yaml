@@ -1,6 +1,6 @@
 ---
 - name: Configure the ownvpn instance
-  hosts: ownvpn
+  hosts: default
   roles:
   - clear-ubuntu
   - easyrsa
