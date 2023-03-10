@@ -6,7 +6,7 @@ OUTPUT_DIR=~/client-configs/files
 BASE_CONFIG=~/client-configs/base.conf
 
 # Generate new cert/key pair
-if /usr/share/easy-rsa/easyrsa --batch gen-req ${1} nopass && /usr/share/easy-rsa/easyrsa --batch sign-req client ${1}; then
+if /usr/share/easy-rsa/easyrsa --batch --req-cn=${1} gen-req ${1} nopass && /usr/share/easy-rsa/easyrsa --batch sign-req client ${1}; then
 	if cp ~/easy-rsa/pki/private/${1}.key ${KEY_DIR} && cp ~/easy-rsa/pki/issued/${1}.crt ${KEY_DIR}; then
 		echo ""
 	else

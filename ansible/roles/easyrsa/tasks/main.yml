@@ -33,7 +33,7 @@
     dest: ~/easy-rsa/vars
 
 - name: Build CA without password
-  command: ./easyrsa --batch build-ca nopass
+  command: ./easyrsa --batch --req-cn=openvpn build-ca nopass
   args:
     chdir: ~/easy-rsa
     creates: ~/easy-rsa/pki/private/ca.key
