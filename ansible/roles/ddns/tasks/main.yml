@@ -1,4 +1,10 @@
 ---
+- name: Install package JQ
+  become: true
+  apt:
+    name: jq
+    state: latest
+
 - name: Copy ddns-cloudflare.sh
   become: true
   template:
