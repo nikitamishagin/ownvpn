@@ -112,3 +112,15 @@ resource "yandex_compute_instance" "ownvpn" {
     preemptible = var.preemptible
   }
 }
+
+// Create inventory file for ansible
+resource "local_file" "ansible_inventary" {
+  content = templatefile("inventory.tftmp",
+    {
+      ip_new_host = yandex_compute_instance.ownvpn.network_interface[0].nat_ip_address
+    }
+  )
+  filename             = "${path.module}/../ansible/hosts.txt"
+  file_permission      = 0664
+  directory_permission = 0775
+}

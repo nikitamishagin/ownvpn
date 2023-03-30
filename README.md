@@ -31,7 +31,7 @@ To deploy your own VPN server in Yandex Cloud, you must complete the following s
 
 ## Preparation
 
-1. (Optional) For convenient Yandex cloud management, I recommend installing the Yandex Cloud CLI package. The YC CLI commands will be shown below to get the necessary information from your terminal.
+1. For convenient Yandex cloud management, I recommend installing the Yandex Cloud CLI package. The YC CLI commands will be shown below to get the necessary information from your terminal.
 
    Link to instructions: https://cloud.yandex.com/en/docs/cli/operations/install-cli
 
@@ -47,16 +47,11 @@ To deploy your own VPN server in Yandex Cloud, you must complete the following s
    yc vpc subnet list
    ```
 
-5. You can get a temporary token with the command:
-   ```bash
-   yc iam create-token
-   ```
+5. You can get your account_id and zone_id CloudFlare using the following instructions: https://developers.cloudflare.com/fundamentals/get-started/basic-tasks/find-account-and-zone-ids/
 
-6. You can get your account_id and zone_id CloudFlare using the following instructions: https://developers.cloudflare.com/fundamentals/get-started/basic-tasks/find-account-and-zone-ids/
+6. CloudFlare token can be obtained using the following instruction: https://developers.cloudflare.com/fundamentals/api/get-started/create-token/
 
-7. CloudFlare token can be obtained using the following instruction: https://developers.cloudflare.com/fundamentals/api/get-started/create-token/
-
-8. Getting the record_id is not an easy task. To do this, you need to refer to the official CloudFlare documentation: https://api.cloudflare.com/#dns-records-for-a-zone-list-dns-records
+7. Getting the record_id is not an easy task. To do this, you need to refer to the official CloudFlare documentation: https://api.cloudflare.com/#dns-records-for-a-zone-list-dns-records
 
    But the authorization method specified there does not work. After searching the forums for answers, I found the method below:
    ```bash
@@ -66,10 +61,10 @@ To deploy your own VPN server in Yandex Cloud, you must complete the following s
    ```
    The field you need is called "id".
 
-9. For terraform to work with your YandexCloud, and for the DDNS script to update records in your CloudFlare, you need to create a file with credentials in the following format:
+8. For terraform to work with your YandexCloud, and for the DDNS script to update records in your CloudFlare, you need to create a file with credentials in the following format:
    ```bash
    export YC_CLOUD_ID="<your_yc_account_id>"
-   export YC_TOKEN="<your_yc_token>"
+   export YC_TOKEN="$(yc iam create-token)"
    export YC_FOLDER_ID="<your_yc_folder_id>"
    export CF_DNS_ZONE="<your_cf_zone_id>"
    export CF_DNS_RECORD="<your_cf_record_id>"
@@ -81,48 +76,31 @@ To deploy your own VPN server in Yandex Cloud, you must complete the following s
    source /path-to-credentials-file
    ```
 
+9. Check the `./terraform/terraform.tfvars` file, and change the values of the variables if you need it.
+
 ## Deploy infrastructure with Terraform
-
-1. Install terraform to automatically deploy resources in the cloud.
-   
-   Link to instructions: https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
-
-2. Go to terraform directory:
+  
+1. Go to terraform directory and initialize providers:
    ```bash
    cd ./terraform
+   terraform init
    ```
    
-3. Check the `./terraform/terraform.tfvars` file, and change the values of the variables if you need it.
-   
-4. Run command:
-   ```bash
-   terraform plan
-   ```
-   and check that all required resources will be correctly created.
-
-5. If everything is correct, run command:
+2. Run command:
    ```bash
    terraform apply
    ```
+   and check that all required resources will be correctly created. If everything is correct, enter `yes`.
 
 After that, the required infrastructure is deployed. In Terraform output will show the ip address of your machine. You will need it to configure and connect via ssh.
 
 ## Configuration VM with Ansible
 
-1. Copy the ip address received from Terraform and add it to the ansible inventory file. It is convenient to do this using a regular expression:
-   ```bash
-   sed -i "s/xxxxxxxxxx/<your-ip-address>/g" ./ansible/hosts.txt
-   ```
-
-2. Go to ansible directory:
-   ```bash
-   cd ./ansible
-   ```
-
-3. Run a playbook that will set up your machine and install everything you need on it:
-   ```bash
-   ansible-playbook -i ./hosts.txt ./playbook.yaml
-   ```
+Run a playbook that will set up your machine and install everything you need on it:
+```bash
+cd ./ansible
+ansible-playbook playbook.yaml
+```
 
 After executing the playbook, your machine will be configured and the openvpn server will be started.
 
