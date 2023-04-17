@@ -43,11 +43,6 @@ variable "username" {
   type        = string
   default     = "root"
 }
-variable "ssh_key" {
-  description = "The public ssh key to access the instance."
-  type        = string
-}
-
 
 // The main parameters of the instance
 variable "hostname" {
