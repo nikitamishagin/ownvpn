@@ -64,7 +64,7 @@ resource "yandex_compute_instance" "ownvpn" {
   metadata = {
     "install-unified-agent" = "0"
     "serial-port-enable"    = "1"
-    "ssh-keys"              = "var.username:var.ssh_key"
+    "ssh-keys"              = "var.username:${file("~/.ssh/id_rsa.pub")}"
     "user-data"             = <<-EOT
             #cloud-config
             datasource:
@@ -76,7 +76,7 @@ resource "yandex_compute_instance" "ownvpn" {
               sudo: ALL=(ALL) NOPASSWD:ALL
               shell: /bin/bash
               ssh_authorized_keys:
-              - ${var.ssh_key}
+              - ${file("~/.ssh/id_rsa.pub")}
         EOT
   }
   name               = var.name
